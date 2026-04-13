@@ -1,38 +1,35 @@
--- [[ SERVIÇOS ]] --
-local player = game.Players.LocalPlayer
-local VirtualUser = game:GetService("VirtualUser")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
+-- 1. LOAD RAYFIELD (Com link alternativo de backup)
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
 
--- [[ VARIÁVEIS GLOBAIS ]] --
+-- 2. VARIÁVEIS (Exatamente como no Lemon Hub / tsuo.txt)
 _G.FastAttack = true
-_G.AttackSpeed = 0.05 -- Podes baixar para 0 se quiseres a velocidade máxima do ficheiro original
+_G.AttackSpeed = 0.05
+local player = game.Players.LocalPlayer
 
--- [[ FUNÇÃO DE ATAQUE (IGUAL AO TEU ARQUIVO TSUO.TXT) ]] --
+-- 3. FUNÇÃO DE ATAQUE EXTRAÍDA DO TSUO.TXT
+-- Colocamos um pcall forte para que o script não morra se o módulo não carregar
 task.spawn(function()
-    while task.wait(_G.AttackSpeed) do
+    while true do
+        task.wait(_G.AttackSpeed)
         if _G.FastAttack then
             pcall(function()
                 local character = player.Character
                 local tool = character and character:FindFirstChildOfClass("Tool")
                 
-                if tool then
-                    -- 1. Clique Físico (Coordenadas exatas do tsuo.txt)
-                    VirtualUser:CaptureController()
-                    VirtualUser:ClickButton1(Vector2.new(851, 158), workspace.CurrentCamera.CFrame)
+                if tool and character:FindFirstChild("HumanoidRootPart") then
+                    -- Clique visual do seu arquivo
+                    game:GetService("VirtualUser"):CaptureController()
+                    game:GetService("VirtualUser"):ClickButton1(Vector2.new(851, 158), workspace.CurrentCamera.CFrame)
                     
-                    -- 2. Ativação da Arma
                     tool:Activate()
 
-                    -- 3. Lógica do CombatFramework (Retirada do tsuo.txt)
-                    local CombatFramework = require(player.PlayerScripts.CombatFramework)
-                    local CombatFrameworkLib = require(player.PlayerScripts.CombatFramework.CombatFrameworkLib)
+                    -- Parte do CombatFramework (O que faz bater rápido no seu arquivo)
+                    local cf = require(player.PlayerScripts.CombatFramework)
+                    local ac = cf.activeController
                     
-                    if CombatFramework.activeController and CombatFramework.activeController.equippedWeapon then
-                        local controller = CombatFramework.activeController
-                        
-                        -- Remove animação e aplica o hit rápido
-                        CombatFrameworkLib.ShowMeleeEffect(controller.equippedWeapon)
-                        controller:attack()
+                    if ac and ac.equippedWeapon then
+                        -- Simula o hit sem delay
+                        ac:attack()
                     end
                 end
             end)
@@ -40,43 +37,28 @@ task.spawn(function()
     end
 end)
 
--- [[ INTERFACE RAYFIELD (LEMON HUB) ]] --
-local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
-
+-- 4. INTERFACE
 local Window = Rayfield:CreateWindow({
    Name = "🍋 Lemon Hub v4.9",
-   LoadingTitle = "A carregar Script...",
-   LoadingSubtitle = "by tsuo Edit",
-   ConfigurationSaving = {
-      Enabled = true,
-      FolderName = "LemonHubConfig",
-      FileName = "Main"
-   }
+   LoadingTitle = "Executando...",
+   LoadingSubtitle = "by tsuo",
+   ConfigurationSaving = { Enabled = false } -- Desativado para evitar erros de permissão de pasta
 })
 
-local Tab1 = Window:CreateTab("Principal", "bolt")
+local Tab = Window:CreateTab("Principal", 4483345998)
 
-Tab1:CreateSection("Sistemas de Combate")
-
-Tab1:CreateToggle({
-   Name = "Auto Click / Fast Attack",
-   CurrentValue = _G.FastAttack,
-   Flag = "FastAttackToggle", 
+Tab:CreateToggle({
+   Name = "Fast Attack (tsuo style)",
+   CurrentValue = true,
+   Flag = "FA1",
    Callback = function(Value)
       _G.FastAttack = Value
    end,
 })
 
-Tab1:CreateSlider({
-   Name = "Velocidade de Ataque",
-   Min = 0,
-   Max = 1,
-   CurrentValue = 0.05,
-   Flag = "AttackSpeedSlider",
-   Callback = function(Value)
-      _G.AttackSpeed = Value
-   end,
+-- Notificação para saber que o script rodou
+Rayfield:Notify({
+   Title = "Lemon Hub",
+   Content = "Script carregado com sucesso!",
+   Duration = 5
 })
-
--- IMPORTANTE: O Rayfield precisa disto para o script aparecer!
-Rayfield:LoadConfiguration()
